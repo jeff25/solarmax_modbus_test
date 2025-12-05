@@ -21,7 +21,7 @@ CONFIG_DATA_SCHEMA = vol.Schema(
     vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
     vol.Required(CONF_HOST): str,
     vol.Required(CONF_PORT, default=DEFAULT_PORT):cv.port,
-    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(int, vol.Range(min=20, msg="invalid_scan_interval")),
+    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(int, vol.Range(min=5, msg="invalid_scan_interval")),
     vol.Optional("ping_host", default=""): str,
     vol.Optional("check_status_first", default=True): bool,
     }
