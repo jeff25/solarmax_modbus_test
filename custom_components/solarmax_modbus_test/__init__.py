@@ -36,8 +36,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> 
     if not hub:
         return False
 
-    # Try to read serial number for device info
-    serial_number, model = await hub.async_read_serial_number()
+    # Try to read serial number for device info (skip if inverter is offline)
+    try:
+        serial_number, model = await hub.async_read_serial_number()
+    except Exception as e:
+        _LOGGER.info(f"Could not read serial number during setup (inverter may be offline): {e}")
+        serial_number, model = None, None
 
     # Create history coordinator
     history_coordinator = SolarMaxHistoryCoordinator(hass, hub)
