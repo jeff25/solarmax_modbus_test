@@ -17,6 +17,9 @@ from . import const as _const
 
 _LOGGER = logging.getLogger(__name__)
 
+# Reduce pymodbus verbosity
+logging.getLogger("pymodbus").setLevel(logging.WARNING)
+
 class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
     """SolarMax Modbus hub."""
     def __init__(self, hass: HomeAssistant, name: str, host: str, port: int, scan_interval: int, ping_host: str | None, check_status_first: bool = True) -> None:
@@ -68,7 +71,7 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
     async def _async_maintain_connection(self):
         """Maintain the connection."""
         if self._client is None:
-            self._client = AsyncModbusTcpClient(host=self._host, port=self._port, timeout=10)
+            self._client = AsyncModbusTcpClient(host=self._host, port=self._port, timeout=3, retries=1)
         if not self._client.connected:
             _LOGGER.info(f"Connecting to Modbus client at {self._host}:{self._port}...")
             try:
@@ -130,8 +133,8 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
                     return {"InverterMode": inverter_mode}
                 
             except Exception as e:
-                _LOGGER.error(f"Error reading status register: {e}")
-                return {"InverterMode": "Connection Error"}
+                _LOGGER.debug(f"Cannot read status register (inverter likely offline): {e}")
+                return {"InverterMode": "offline"}
         
         # Read all 60 registers (either status check passed or disabled)
         try:
