@@ -1,0 +1,5 @@
+# Services for SolarMax Modbus integration
+
+import_history:
+  name: Import historical data
+  description: Manually trigger import of historical production data from inverter (last 30 days)
