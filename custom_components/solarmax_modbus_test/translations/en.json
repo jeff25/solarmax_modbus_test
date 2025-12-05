@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Define your SolarMax Inverter modbus-connection",
+        "data": {
+          "host": "The ip-address of your SolarMax Inverter modbus device",
+          "name": "The prefix to be used for your SolarMax Inverter sensors",
+          "port": "The TCP port on which to connect to the SolarMax Inverter",
+          "scan_interval": "The polling frequency of the modbus registers in seconds",
+          "ping_host": "IP of inverter to detect power on",
+          "check_status_first": "Check inverter status first (skip reading all registers when offline)"
+        }
+      }
+    },
+    "error": {
+      "already_configured": "Device is already configured",
+      "invalid_scan_interval": "Scan interval must be at least 60 seconds"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  }
+}

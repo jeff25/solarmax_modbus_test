@@ -1,0 +1,5 @@
+{
+    "name": "Solarmax Inverter Modbus",
+    "homeassistant": "2025.11.1",
+    "hacs": "2.0.1"
+}

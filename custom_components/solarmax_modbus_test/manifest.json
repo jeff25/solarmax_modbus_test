@@ -1,0 +1,19 @@
+{
+  "domain": "solarmax_modbus_test",
+  "name": "SolarMax Modbus (Test)",
+  "codeowners": [
+    "@Chris-42"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/Port-Net/homeassistant-solarmax-modbus",
+  "homekit": {},
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "quality_scale": "bronze",
+  "requirements": ["pymodbus>=3.6.9", "icmplib==3.0"],
+  "ssdp": [],
+  "zeroconf": [],
+
+  "version": "0.3.2"
+}
