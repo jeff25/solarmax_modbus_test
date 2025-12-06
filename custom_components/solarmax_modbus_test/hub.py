@@ -105,7 +105,7 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
         await self._async_maintain_connection()
         
         # Optional: Check inverter status before reading all registers
-        if self._check_status_first:
+        if False and self._check_status_first:  # Temporarily disabled
             try:
                 # Read only InverterMode register at 4125 with Unit ID 1
                 status_reg = await self._client.read_holding_registers(4125, count=1, slave=1)
