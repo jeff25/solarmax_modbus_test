@@ -120,19 +120,21 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
                     self._client.DATATYPE.UINT16
                 )
                 
-                _LOGGER.info(f"Quick status check - register 4125 value: {status_value}")
+                # Map to status name
+                if status_value in _const.STATUS_INVERTER_MODE:
+                    inverter_mode = _const.STATUS_INVERTER_MODE[status_value]
+                else:
+                    inverter_mode = f"unknown {status_value}"
                 
-                # Only proceed with full read if value is 0 (Initial Mode), 1 (Standby), or 3 (OnGrid)
-                if status_value not in [0, 1, 3]:
-                    _LOGGER.info(f"Inverter status value {status_value} indicates inactive - skipping full register read")
-                    # Map to status name for display
-                    if status_value in _const.STATUS_INVERTER_MODE:
-                        self.inverter_data["InverterMode"] = _const.STATUS_INVERTER_MODE[status_value]
-                    else:
-                        self.inverter_data["InverterMode"] = f"unknown {status_value}"
+                _LOGGER.info(f"Quick status check: {inverter_mode} (value: {status_value})")
+                
+                # Only proceed with full read if inverter is in active state
+                if inverter_mode not in ["OnGrid", "Standby", "Initial Mode"]:
+                    _LOGGER.info(f"Inverter in '{inverter_mode}' state - skipping full register read")
+                    self.inverter_data["InverterMode"] = inverter_mode
                     return self.inverter_data
                 
-                _LOGGER.info(f"Inverter active (value: {status_value}) - proceeding with full 60 register read")
+                _LOGGER.info(f"Inverter is {inverter_mode} - proceeding with full 60 register read")
                 
             except Exception as e:
                 _LOGGER.warning(f"Status check failed: {e}", exc_info=True)
