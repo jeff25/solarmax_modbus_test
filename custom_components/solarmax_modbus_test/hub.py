@@ -159,8 +159,8 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
         try:
             await self._async_maintain_connection()
             
-            # Read serial number from registers 6672-6678 (7 registers) with Unit ID 1
-            sn_data = await self._client.read_holding_registers(6672, count=7, slave=1)
+            # Read serial number from registers 6672-6678 (7 registers)
+            sn_data = await self._client.read_holding_registers(6672, count=7)
 
             if sn_data.isError():
                 _LOGGER.warning("Could not read serial number from registers 6672-6678")
