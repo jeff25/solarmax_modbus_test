@@ -22,6 +22,9 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
 
+# Reduce pymodbus verbosity globally
+logging.getLogger("pymodbus").setLevel(logging.WARNING)
+
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the SolarMax Modbus component."""
     hass.data.setdefault(DOMAIN, {})
