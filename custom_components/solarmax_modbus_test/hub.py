@@ -285,23 +285,23 @@ class SolarMaxHistoryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             now = datetime.now()
             
             # Register 12288: Year
-            await self._hub._client.write_register(12288, now.year, slave=1)
+            await self._hub._client.write_register(12288, now.year)
             _LOGGER.debug(f"Wrote year: {now.year}")
             
             # Register 12289: Month (high byte) + Day (low byte)
             month_day = (now.month * 256) + now.day
-            await self._hub._client.write_register(12289, month_day, slave=1)
+            await self._hub._client.write_register(12289, month_day)
             _LOGGER.debug(f"Wrote month/day: {now.month}/{now.day}")
             
             # Register 12290: Hour (high byte) + Minute (low byte)
             hour_minute = (now.hour * 256) + now.minute
-            await self._hub._client.write_register(12290, hour_minute, slave=1)
+            await self._hub._client.write_register(12290, hour_minute)
             _LOGGER.debug(f"Wrote hour/minute: {now.hour}:{now.minute}")
             
             # Register 12291: 45 (high byte) + Second (low byte)
             # Note: 45 seems to be a constant, keeping it as in original script
             second_value = (45 * 256) + now.second
-            await self._hub._client.write_register(12291, second_value, slave=1)
+            await self._hub._client.write_register(12291, second_value)
             _LOGGER.debug(f"Wrote second: {now.second}")
             
             _LOGGER.info(f"Successfully synced inverter RTC to {now.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -328,6 +328,7 @@ class SolarMaxHistoryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 "source": "recorder",
                 "statistic_id": "sensor.solarmax_smt_history_production_v2",
                 "unit_of_measurement": "kWh",
+                "mean_type": "mean",
             }
             
             today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
