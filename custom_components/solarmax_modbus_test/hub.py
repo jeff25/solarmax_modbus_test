@@ -107,36 +107,35 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
         # Optional: Check inverter status before reading all registers
         if self._check_status_first:
             try:
-                # Read first 29 registers (4097-4125) with Unit ID 1
-                # InverterMode is at offset 28 (register 4125 = 4097 + 28)
-                status_block = await self._client.read_holding_registers(4097, count=29, slave=1)
-                if status_block.isError():
+                # Read only InverterMode register at 4125 with Unit ID 1
+                status_reg = await self._client.read_holding_registers(4125, count=1, slave=1)
+                if status_reg.isError():
                     _LOGGER.debug("Inverter not responding - skipping full register read")
                     self.inverter_data["InverterMode"] = "offline"
                     return self.inverter_data
                 
-                # Decode status value from offset 28
+                # Decode status value
                 status_value = self._client.convert_from_registers(
-                    status_block.registers[28:29], 
+                    status_reg.registers[0:1], 
                     self._client.DATATYPE.UINT16
                 )
                 
-                # Map to status name
-                if status_value in _const.STATUS_INVERTER_MODE:
-                    inverter_mode = _const.STATUS_INVERTER_MODE[status_value]
-                else:
-                    inverter_mode = f"unknown {status_value}"
+                _LOGGER.info(f"Quick status check - register 4125 value: {status_value}")
                 
-                _LOGGER.debug(f"Quick status check: {inverter_mode} (value: {status_value})")
-                
-                # Only proceed with full read if inverter is in active state
-                if inverter_mode not in ["OnGrid", "Standby", "Initial Mode"]:
-                    _LOGGER.debug(f"Inverter in '{inverter_mode}' state - skipping full register read")
-                    self.inverter_data["InverterMode"] = inverter_mode
+                # Only proceed with full read if value is 0 (Initial Mode), 1 (Standby), or 3 (OnGrid)
+                if status_value not in [0, 1, 3]:
+                    _LOGGER.info(f"Inverter status value {status_value} indicates inactive - skipping full register read")
+                    # Map to status name for display
+                    if status_value in _const.STATUS_INVERTER_MODE:
+                        self.inverter_data["InverterMode"] = _const.STATUS_INVERTER_MODE[status_value]
+                    else:
+                        self.inverter_data["InverterMode"] = f"unknown {status_value}"
                     return self.inverter_data
                 
+                _LOGGER.info(f"Inverter active (value: {status_value}) - proceeding with full 60 register read")
+                
             except Exception as e:
-                _LOGGER.debug(f"Cannot reach inverter (likely offline): {e}")
+                _LOGGER.warning(f"Status check failed: {e}", exc_info=True)
                 self.inverter_data["InverterMode"] = "offline"
                 return self.inverter_data
         
@@ -145,10 +144,10 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
             regs = await self._client.read_holding_registers(4097, count=60, slave=1)
             if regs.isError():
                 _LOGGER.error("Error reading full register range")
-                return {"InverterMode": inverter_mode}  # Return at least the status
+                return self.inverter_data  # Return existing data
         except Exception as e:
             _LOGGER.error(f"Error reading holding registers: {e}")
-            return {"InverterMode": inverter_mode}
+            return self.inverter_data  # Return existing data
         
         _LOGGER.debug(f"Read {len(regs.registers)} registers from active inverter")
         
