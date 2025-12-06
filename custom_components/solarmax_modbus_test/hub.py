@@ -325,7 +325,7 @@ class SolarMaxHistoryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 "has_sum": True,
                 "name": "Solar Production History",
                 "source": DOMAIN,
-                "statistic_id": "solarmax_test:solar_production",  # No underscores allowed in statistic_id
+                "statistic_id": "solarmaxtest:solar_production",  # No underscores or special chars allowed
                 "unit_of_measurement": "kWh",
             }
             
