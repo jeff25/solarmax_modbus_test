@@ -320,13 +320,13 @@ class SolarMaxHistoryCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             # Read 30 days of historical data
             # Each day has 48 registers, but we only use every 2nd starting from index 1
             all_statistics = []
-            # External statistics ID format (lowercase, no special chars except underscore)
+            # Use a fresh, unique statistic_id to avoid old test conflicts
             metadata = {
                 "has_mean": False,
                 "has_sum": True,
-                "name": "Solar Production History",
-                "source": "import",  # Custom source name for external statistics
-                "statistic_id": "import:solarmax_history",  # Simple format without domain underscores
+                "name": "SolarMax SMT History Production",
+                "source": "recorder",
+                "statistic_id": "sensor.solarmax_smt_history_production_v2",
                 "unit_of_measurement": "kWh",
             }
             
