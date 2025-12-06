@@ -107,16 +107,17 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
         # Optional: Check inverter status before reading all registers
         if self._check_status_first:
             try:
-                # Read InverterMode register at 4125
-                status_check = await self._client.read_holding_registers(4125, count=1)
-                if status_check.isError():
+                # Read first 29 registers (4097-4125) with Unit ID 1
+                # InverterMode is at offset 28 (register 4125 = 4097 + 28)
+                status_block = await self._client.read_holding_registers(4097, count=29, slave=1)
+                if status_block.isError():
                     _LOGGER.debug("Inverter not responding - skipping full register read")
                     self.inverter_data["InverterMode"] = "offline"
                     return self.inverter_data
                 
-                # Decode status value
+                # Decode status value from offset 28
                 status_value = self._client.convert_from_registers(
-                    status_check.registers[0:1], 
+                    status_block.registers[28:29], 
                     self._client.DATATYPE.UINT16
                 )
                 
@@ -141,7 +142,7 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
         
         # Read all 60 registers (either status check passed or disabled)
         try:
-            regs = await self._client.read_holding_registers(4097, count=60)
+            regs = await self._client.read_holding_registers(4097, count=60, slave=1)
             if regs.isError():
                 _LOGGER.error("Error reading full register range")
                 return {"InverterMode": inverter_mode}  # Return at least the status
@@ -200,8 +201,8 @@ class SolarMaxModbusHub(DataUpdateCoordinator[dict[str, Any]]):
         try:
             await self._async_maintain_connection()
             
-            # Read serial number from registers 6672-6678 (7 registers)
-            sn_data = await self._client.read_holding_registers(6672, count=7)
+            # Read serial number from registers 6672-6678 (7 registers) with Unit ID 1
+            sn_data = await self._client.read_holding_registers(6672, count=7, slave=1)
 
             if sn_data.isError():
                 _LOGGER.warning("Could not read serial number from registers 6672-6678")
